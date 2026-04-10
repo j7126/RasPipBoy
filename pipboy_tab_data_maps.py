@@ -59,13 +59,13 @@ class Mode_Map:
 		cursBoxSize = (2 * self.cursorRadius)
 		thirdSize = (cursBoxSize / 3)
 		self.cursorBox = pygame.Surface((cursBoxSize, cursBoxSize))
-		self.cursorBox.fill((0,0,0))
+		self.cursorBox.fill((255, 255, 255))
 		lnSize = 2
-		pygame.draw.rect(self.cursorBox, (255,255,255), (self.cursorRadius-(lnSize/2),self.cursorRadius-(lnSize/2),lnSize,lnSize), 0)
-		pygame.draw.lines(self.cursorBox, (255,255,255), False, [(lnSize,thirdSize),(lnSize,lnSize),(thirdSize,lnSize)], lnSize)
-		pygame.draw.lines(self.cursorBox, (255,255,255), False, [(cursBoxSize-thirdSize,lnSize),(cursBoxSize-lnSize,lnSize),(cursBoxSize-lnSize,thirdSize)], lnSize)
-		pygame.draw.lines(self.cursorBox, (255,255,255), False, [(lnSize,cursBoxSize-thirdSize),(lnSize,cursBoxSize-lnSize),(thirdSize,cursBoxSize-lnSize)], lnSize)
-		pygame.draw.lines(self.cursorBox, (255,255,255), False, [(cursBoxSize-thirdSize,cursBoxSize-lnSize),(cursBoxSize-lnSize,cursBoxSize-lnSize),(cursBoxSize-lnSize,cursBoxSize-thirdSize)], lnSize)
+		pygame.draw.rect(self.cursorBox, (0,0,0), (self.cursorRadius-(lnSize/2),self.cursorRadius-(lnSize/2),lnSize,lnSize), 0)
+		pygame.draw.lines(self.cursorBox, (0,0,0), False, [(lnSize,thirdSize),(lnSize,lnSize),(thirdSize,lnSize)], lnSize)
+		pygame.draw.lines(self.cursorBox, (0,0,0), False, [(cursBoxSize-thirdSize,lnSize),(cursBoxSize-lnSize,lnSize),(cursBoxSize-lnSize,thirdSize)], lnSize)
+		pygame.draw.lines(self.cursorBox, (0,0,0), False, [(lnSize,cursBoxSize-thirdSize),(lnSize,cursBoxSize-lnSize),(thirdSize,cursBoxSize-lnSize)], lnSize)
+		pygame.draw.lines(self.cursorBox, (0,0,0), False, [(cursBoxSize-thirdSize,cursBoxSize-lnSize),(cursBoxSize-lnSize,cursBoxSize-lnSize),(cursBoxSize-lnSize,cursBoxSize-thirdSize)], lnSize)
 		self.cursorBox = self.cursorBox.convert()
 		self.resetCursorPos()
 		
@@ -97,7 +97,7 @@ class Mode_Map:
 			self.mapFilename = ("%s/map_world.jpg" %(config.CACHEPATH))
 			self.dataFilename = ("%s/map_world.txt" %(config.CACHEPATH))
 			self.mapArgs = "&maptype=hybrid&style=feature:road|element:geometry|color:0xDDDDDD&style=element:labels|visibility:off"
-			self.mapZoom = 14
+			self.mapZoom = 15
 			
 			# Load map-marker icons:
 			self.images = {
@@ -327,7 +327,7 @@ class Mode_Map:
 		
 		# Draw marker if it is on-screen:
 		if ((px+markerSize) >= 0) and (px <= config.WIDTH) and ((py+markerSize) >= 0) and (py <= config.HEIGHT): 
-			self.mapCanvas.blit (markerImg, (px,py),None,pygame.BLEND_RGB_ADD)
+			self.mapCanvas.blit (markerImg, (px,py),None,pygame.BLEND_MIN)
 	
 	def drawPage(self):
 		
@@ -356,13 +356,13 @@ class Mode_Map:
 				self.drawMarkerToCanvas (item)
 			
 			# Draw cursor-box:
-			self.mapCanvas.blit (self.cursorBox, (self.cursorPosX-self.cursorRadius,self.cursorPosY-self.cursorRadius),None,pygame.BLEND_RGB_ADD)
+			self.mapCanvas.blit (self.cursorBox, (self.cursorPosX-self.cursorRadius,self.cursorPosY-self.cursorRadius),None,pygame.BLEND_MIN)
 			
 			if (self.cursorName != ""):
-				textImg = config.FONT_LRG.render(self.cursorName, True, config.DRAWCOLOUR, (0, 0, 0))
+				textImg = config.FONT_LRG.render(self.cursorName, True, pygame.Color(0, 0, 0), pygame.Color(255, 255, 255))
 				textX = self.cursorPosX-(textImg.get_width() / 2)
 				textY = self.cursorPosY+self.cursorRadius+(config.charHeight / 2)
-				self.mapCanvas.blit(textImg, (textX,textY), None, pygame.BLEND_ADD)
+				self.mapCanvas.blit(textImg, (textX,textY), None, pygame.BLEND_MIN)
 			
 			# Blit to page-canvas:
 			self.pageCanvas.blit (self.mapCanvas, (0,0))
