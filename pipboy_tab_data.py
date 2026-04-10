@@ -50,7 +50,7 @@ class Tab_Data:
 			self.name = "Misc"
 			self.pageCanvas = pygame.Surface((config.WIDTH, config.HEIGHT))
 			if (config.BACKLIGHT_SYSFS_PATH != ""):
-				self.brightness = int(config.BACKLIGHT_SYSFS_PATH.read_text())
+				self.brightness = int(Path(config.BACKLIGHT_SYSFS_PATH).read_text())
 
 		def drawPage(self):
 			pageChanged = self.changed
@@ -78,7 +78,7 @@ class Tab_Data:
 					
 					if (newBrightness != self.newBrightness):
 						self.brightness = newBrightness
-						config.BACKLIGHT_SYSFS_PATH.write_text(self.brightness)
+						Path(config.BACKLIGHT_SYSFS_PATH).write_text(self.brightness)
 		
 	# Generate text for header:
 	def getHeaderText(self):
