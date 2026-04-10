@@ -18,6 +18,8 @@ if config.USE_SERIAL:
 	import serial
 if config.USE_CAMERA:
 	from pipboy_camera import *
+if config.USE_GPIO:
+	import pipboy_gpio
 
 def getTimeStr():
 	curTime = time.localtime(time.time())
@@ -40,17 +42,20 @@ class Engine:
 			self.ser = config.ser
 			True#self.ser.write("gaugeMode=2")
 		
-		print "Init pygame:"
+		if (config.USE_GPIO):
+			self.gpioInput = pipboy_gpio.PipBoyGpioInput()
+		
+		print("Init pygame:")
 		pygame.init()
 		pygame.display.init()
-		print "(done)"
+		print("(done)")
 		
 		self.rootParent = self
 		self.screenSize = (pygame.display.Info().current_w, pygame.display.Info().current_h)
 		self.canvasSize = (config.WIDTH, config.HEIGHT)
 		
-		print 'Resolution: {0}x{1}'.format(self.screenSize[0], self.screenSize[1])
-		print 'Canvas Size: {0}x{1}'.format(self.canvasSize[0], self.canvasSize[1])
+		print('Resolution: {0}x{1}'.format(self.screenSize[0], self.screenSize[1]))
+		print('Canvas Size: {0}x{1}'.format(self.canvasSize[0], self.canvasSize[1]))
 		
 		# Don't show mouse-pointer:
 		pygame.mouse.set_visible(0)
@@ -126,7 +131,7 @@ class Engine:
 		distortSpeed = (config.HEIGHT / 40)
 		self.overlayFrames = []
 		
-		print "START"
+		print("START")
 		
 		cmdLine = CmdLineClass(self)
 	
@@ -190,7 +195,7 @@ class Engine:
 		self.overlayFramesCount = (2 * self.animDelayFrames)
 		self.frameNum = 0
 		
-		print "END GENERATE"
+		print("END GENERATE")
 		
 		# Get coordinates:
 		self.gpsModule.getCoords(cmdLine)
@@ -216,7 +221,7 @@ class Engine:
 		
 		if config.USE_SOUND:
 			config.SOUNDS["start"].play()
-		print "END INIT PROCESS"
+		print("END INIT PROCESS")
 		
 		self.currentTab.resetPage(self.modeNum)
 		tabCanvas, tabChanged = self.drawTab()
@@ -430,6 +435,33 @@ class Engine:
 				except:
 					print ("Serial-port failure!")
 					config.USE_SERIAL = False
+			
+			if (config.USE_GPIO):
+				# page mode
+				rotary_1_input = self.gpioInput.rotary1.get_input()
+				if (rotary_1_input < 0):
+					self.modeNum -= 1
+				elif (rotary_1_input > 0):
+					self.modeNum += 1
+				while (self.modeNum < 0):
+					self.modeNum += 5
+				while (self.modeNum > 4):
+					self.modeNum -= 5
+				
+				# tab
+				if (self.gpioInput.button1.get_input()):
+					self.tabNum = 0
+				elif (self.gpioInput.button2.get_input()):
+					self.tabNum = 1
+				elif (self.gpioInput.button3.get_input()):
+					self.tabNum = 2
+
+				# vertical input
+				rotary_2_input = self.gpioInput.rotary2.get_input()
+				if rotary_2_input > 0: # List up
+					moveVals[2] += 1
+				elif rotary_2_input < 0: # List down
+					moveVals[2] -= 1				
 			
 			# Run through Pygame's keyboard/mouse event-queue:
 			for event in pygame.event.get():

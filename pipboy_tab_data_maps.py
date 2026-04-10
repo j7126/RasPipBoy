@@ -3,7 +3,7 @@
 # Bits dealing with maps
 
 import pygame, os, time, datetime, random, math, numpy
-import urllib
+import urllib.request
 from PIL import Image, ImageEnhance
 from gdal2tiles import GlobalMercator
 from pygame.locals import *
@@ -196,7 +196,7 @@ class Mode_Map:
 				# Only use coordinates-cache file if its version matches current version:
 				if (savedVersion == self.saveVersion):
 					if (savedMapLocation == self.mapLocation):
-						print "  Map-file is up-to-date, no need to download"
+						print("  Map-file is up-to-date, no need to download")
 						self.minLat = eval(f.readline())
 						self.minLon = eval(f.readline())
 						self.maxLat = eval(f.readline())
@@ -214,11 +214,11 @@ class Mode_Map:
 					print ("  Invalid cache-version, ignoring file")
 		
 		if doDownload:
-			print "DOWNLOADING:"
-			mapUrl = "http://maps.googleapis.com/maps/api/staticmap?center=%s" %(self.mapLocation)
+			print("DOWNLOADING:")
+			mapUrl = "https://maps.googleapis.com/maps/api/staticmap?center=%s&key=%s" %(self.mapLocation,config.gKey)
 			mapUrl += ("&zoom=%s&scale=%s&size=%sx%s%s&sensor=true" %(str(self.mapZoom), str(self.mapScale), str(self.mapSize), str(self.mapSize), self.mapArgs))
-			print mapUrl
-			urllib.urlretrieve (mapUrl,self.mapFilename)
+			print(mapUrl)
+			urllib.request.urlretrieve (mapUrl,self.mapFilename)
 			
 			if (self.mapType == 1):
 				# Download a set of places from Google for markers:
@@ -226,8 +226,8 @@ class Mode_Map:
 			
 			# Work out coordinates for map's corners:
 			self.getMapBounds(lat, lon, self.mapZoom, self.mapSize)
-			print "  Lat/Lon Min:(%s,%s) Max:(%s,%s)" %(self.minLat,self.minLon,self.maxLat,self.maxLon)
-			print "  Writing to file: %s" %(self.dataFilename)
+			print("  Lat/Lon Min:(%s,%s) Max:(%s,%s)" %(self.minLat,self.minLon,self.maxLat,self.maxLon))
+			print("  Writing to file: %s" %(self.dataFilename))
 			with open(self.dataFilename, 'w') as f:
 				f.write("%s\n" %(self.saveVersion))
 				f.write("%s\n" %(self.mapLocation))
@@ -238,12 +238,12 @@ class Mode_Map:
 			
 			# Load downloaded image via PIL, and tweak contrast/brightness:
 			im = Image.open(self.mapFilename)
+			im = im.convert("RGB")
 			im = ImageEnhance.Contrast(im).enhance(1.5)
 			im = ImageEnhance.Brightness(im).enhance(0.2)
-			im = im.convert("RGB")
 			
 			# Convert PIL image to Pygame surface:
-			self.mapImage = pygame.image.frombuffer(im.tostring(), im.size, "RGB")
+			self.mapImage = pygame.image.frombuffer(im.tobytes(), im.size, "RGB")
 			
 			# Add lines to World Map:
 			if (self.mapType == 1):
@@ -257,7 +257,7 @@ class Mode_Map:
 				for n in [1,2]:
 					mapArray = pygame.surfarray.pixels3d(self.mapImage)
 					noisePixSize = (stepSize * n)
-					noise_small = numpy.random.random((imageSize/noisePixSize,imageSize/noisePixSize)) * 0.6 + 0.5
+					noise_small = numpy.random.random((imageSize//noisePixSize,imageSize//noisePixSize)) * 0.6 + 0.5
 					noise_big = noise_small.repeat(noisePixSize, 0).repeat(noisePixSize, 1)
 					mapArray *= noise_big[:, :, numpy.newaxis]
 			
@@ -269,7 +269,7 @@ class Mode_Map:
 					pygame.draw.lines(self.mapImage, gridColour, False, [(gridPos, 0), (gridPos, imageSize)], lineWidth)
 					gridPos += stepSize
 				pygame.draw.rect(self.mapImage, (255,255,255), (0,0,imageSize,imageSize), lineWidth)
-				print "GRIDDED!"
+				print("GRIDDED!")
 				
 			# Save processed image to cache-folder:
 			pygame.image.save(self.mapImage, self.mapFilename)
@@ -295,7 +295,8 @@ class Mode_Map:
 		py += self.viewPosY
 		
 		# Draw to map:
-		self.mapCanvas.blit (self.mapCursor, (px,py))
+		if config.USE_CURSOR:
+			self.mapCanvas.blit (self.mapCursor, (px,py))
 	
 	# Draw a given marker to mapCanvas at specific latitude/longitude coordinates:
 	def drawMarkerToCanvas(self, placeItem):
@@ -390,8 +391,8 @@ class Mode_Map:
 
 				# Mouse acceleration feature:
 				accelTime = 5000
-				maxAccel = 400
-				minAccel = 2
+				maxAccel = 4
+				minAccel = 1
 				
 				currentTick = pygame.time.get_ticks()
 				

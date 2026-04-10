@@ -2,7 +2,7 @@
 #	Neal D Corbett, 2013
 # Class for 'Stats' tab
 
-import pygame, os, time, random, math, string, numpy
+import pygame, os, time, random, math, numpy
 from pygame.locals import *
 
 import config
@@ -108,6 +108,8 @@ class Tab_Stats:
 						self.frameNum += 1;
 				
 				elif (self.name == 'WAN'):	# Show WiFi signal-level
+					self.minVal = -100
+					self.maxVal = 0
 					newVal = 0
 					if (config.USE_INTERNET):
 						# Get relevant line from proc:
@@ -119,10 +121,10 @@ class Tab_Stats:
 								line = f.readline()
 						
 							# Get 'Quality:Level' value:
-							tokens = string.split(line)
+							tokens = line.split()
 							token = tokens[3]
-							token = string.replace(token, ".", "")
-							newVal = string.atoi(token)
+							token = token.replace(".", "")
+							newVal = int(token)
 						except:
 							pass
 				else:
@@ -221,8 +223,8 @@ class Tab_Stats:
 				if (self.name == 'BAT'):	# Get battery-status events
 					for event in events:
 						if (type(event) is str) and (event.startswith('volts')):
-							print event; # DEBUG PRINT
-							tokens = string.split(event);
+							print(event) # DEBUG PRINT
+							tokens = event.split();
 							
 							batVolts = float(tokens[1]);
 							minVolts = 6.30;
@@ -231,8 +233,8 @@ class Tab_Stats:
 				elif (self.name == 'TMP'):	# Get temperature-status events
 					for event in events:
 						if (type(event) is str) and (event.startswith('temp')):
-							print event; # DEBUG PRINT
-							tokens = string.split(event);
+							print(event) # DEBUG PRINT
+							tokens = event.split();
 							
 							tempVal = float(tokens[1]);
 							minTemp = -40.0;

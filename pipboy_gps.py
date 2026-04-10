@@ -3,7 +3,7 @@
 # GPS/position functions
 
 import os, time, math
-import urllib, urllib2, StringIO, json
+import urllib.request, urllib.parse, io, json
 import config
 
 if config.USE_GPS:
@@ -14,7 +14,7 @@ if config.USE_GPS:
 			import gps
 		except:
 			# Deactivate GPS-related systems if load failed:
-			print "GPS LIBRARY NOT FOUND!"
+			print("GPS LIBRARY NOT FOUND!")
 			config.USE_GPS = False
 	loadGPS()
 
@@ -40,14 +40,15 @@ class GpsModuleClass:
 		urlParams = {
 			'address': address,
 			'sensor': 'false',
+			'key': config.gKey
 		}
-		url = 'http://maps.google.com/maps/api/geocode/json?' + urllib.urlencode( urlParams )
-		print url
-		response = urllib2.urlopen( url )
+		url = 'https://maps.google.com/maps/api/geocode/json?' + urllib.parse.urlencode( urlParams )
+		response = urllib.request.urlopen( url )
 		responseBody = response.read()
 		
-		body = StringIO.StringIO( responseBody )
+		body = io.BytesIO( responseBody )
 		result = json.load( body )
+		print(result)
 		if 'status' not in result or result['status'] != 'OK':
 			return None
 		else:
@@ -58,14 +59,15 @@ class GpsModuleClass:
 		urlParams = {
 			'latlng': (str(lat) +"," + str(lon)),
 			'sensor': 'false',
+			'key': config.gKey
 		}
-		url = 'http://maps.google.com/maps/api/geocode/json?' + urllib.urlencode( urlParams )
-		print "latLongToLocality:"
-		print url
-		response = urllib2.urlopen( url )
+		url = 'https://maps.google.com/maps/api/geocode/json?' + urllib.parse.urlencode( urlParams )
+		print("latLongToLocality:")
+		print(url)
+		response = urllib.request.urlopen( url )
 		responseBody = response.read()
 		
-		body = StringIO.StringIO( responseBody )
+		body = io.BytesIO( responseBody )
 		result = json.load( body )
 		if 'status' not in result or result['status'] != 'OK':
 			return None
@@ -115,7 +117,7 @@ class GpsModuleClass:
 			# Don't use GPS if no devices were found:
 			if (len(session.devices) == 0):
 				config.USE_GPS = False
-				print "GPS MODULE NOT FOUND!"
+				print("GPS MODULE NOT FOUND!")
 			
 			if config.USE_GPS:
 				try:

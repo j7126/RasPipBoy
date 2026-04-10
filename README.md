@@ -1,4 +1,19 @@
 # RasPipBoy
+
+This is my updated & customised version of RasPipBoy (https://bitbucket.org/selectnone/raspipboy/src).
+
+Additions I have made:
+- Update it to the latest python3 & replaces some of the obselete dependencies.
+- Add support for controlling with encoders & buttons connected to the pi's GPIO.
+
+## Configuration
+
+The `config.py` is no longer directly included in the repo, instead create your own based on `config-template.py`
+
+
+Original README:
+
+# RasPipBoy
 *by **Neal D Corbett***
 
 This is the [Pip-Boy 3000 user interface](http://www.youtube.com/watch?v=2iHNDYLm9-A&list=PLickeZlNSDh1gQIhxbzHKZVxq465AhWfz&index=1) from the game [*Fallout 3*](http://fallout.bethsoft.com/), written in Python for the [Raspberry Pi](http://www.raspberrypi.org/) single-board computer.
