@@ -10,6 +10,8 @@ import pipboy_headFoot as headFoot
 import pipboy_tab_data_maps as dataMap
 import pipboy_tab_data_radio as radio
 
+from pathlib import Path
+
 class Tab_Data:
 	
 	name = "DATA"
@@ -47,6 +49,8 @@ class Tab_Data:
 			self.rootParent = self.parent.rootParent
 			self.name = "Misc"
 			self.pageCanvas = pygame.Surface((config.WIDTH, config.HEIGHT))
+			if (config.BACKLIGHT_SYSFS_PATH != ""):
+				self.brightness = int(config.BACKLIGHT_SYSFS_PATH.read_text())
 
 		def drawPage(self):
 			pageChanged = self.changed
@@ -60,7 +64,21 @@ class Tab_Data:
 			True
 		# Consume events passed to this page:
 		def ctrlEvents(self,events):
-			True
+			for event in events:
+				# Arrow-keys change brightness:
+				if (config.BACKLIGHT_SYSFS_PATH != "" and type(event) is list):
+					
+					listMove = event[2]
+					newBrightness = self.brightness - listMove * 50
+					
+					if (newBrightness < 0):
+						newBrightness = 0
+					elif (newBrightness >= 255):
+						newBrightness = 255
+					
+					if (newBrightness != self.newBrightness):
+						self.brightness = newBrightness
+						config.BACKLIGHT_SYSFS_PATH.write_text(self.brightness)
 		
 	# Generate text for header:
 	def getHeaderText(self):

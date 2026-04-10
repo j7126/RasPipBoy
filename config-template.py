@@ -20,6 +20,9 @@ USE_CURSOR = False # show the cursor in the map screen. enable for mouse, disabl
 WIDTH = 800
 HEIGHT = 480
 
+# Brightness control
+BACKLIGHT_SYSFS_PATH = ""
+
 # Address for map's default position: 
 #	(used if GPS is inactive)
 defaultPlace = "Washington DC"
