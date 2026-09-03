@@ -13,9 +13,6 @@ from pipboy_tab_data import *
 from pipboy_cmdline import *
 
 # Load optional libraries: (these will have been tested by config.py)
-if config.USE_SERIAL:
-	global serial
-	import serial
 if config.USE_CAMERA:
 	from pipboy_camera import *
 if config.USE_GPIO:
@@ -32,15 +29,10 @@ class Engine:
 	torchMode = False
 	tabNum = 0
 	modeNum = 0
-	serBuffer = ""
 	
 	background = None
 	
 	def __init__(self, *args, **kwargs):
-		
-		if(config.USE_SERIAL):
-			self.ser = config.ser
-			True#self.ser.write("gaugeMode=2")
 		
 		if (config.USE_GPIO):
 			self.gpioInput = pipboy_gpio.PipBoyGpioInput()
@@ -376,66 +368,6 @@ class Engine:
 			doUpdate = False
 			updateSound = None
 			
-			if(config.USE_SERIAL):
-				# Run through serial-buffer characters, converting to pygame events if required:
-				ser = self.ser
-				serMouseDist = 10
-				try:
-					while ser.inWaiting():
-						char = ser.read(1)
-						
-						if ((char != '\n') and (char != '\r')):
-							self.serBuffer = (self.serBuffer + char)
-							#print char
-						else:
-							serBuffer = self.serBuffer
-							#print serBuffer
-							
-							if (serBuffer == 'lighton'): # Torch On
-								self.torchMode = True
-							elif (serBuffer == 'lightoff'): # Torch Off
-								self.torchMode = False
-							elif (serBuffer == '1'):
-								self.tabNum = 0
-							elif (serBuffer == '2'):
-								self.tabNum = 1
-							elif (serBuffer == '3'):
-								self.tabNum = 2
-							elif (serBuffer == 'q'):
-								self.modeNum = 0
-							elif (serBuffer == 'w'):
-								self.modeNum = 1
-							elif (serBuffer == 'e'):
-								self.modeNum = 2
-							elif (serBuffer == 'r'):
-								self.modeNum = 3
-							elif (serBuffer == 't'):
-								self.modeNum = 4
-							elif (serBuffer == 'select'): # Select
-								pageEvents.append('sel')
-							elif (serBuffer == 'cursorup'): # List up
-								moveVals[2] += 1
-							elif (serBuffer == 'cursordown'): # List down
-								moveVals[2] -= 1
-							elif (serBuffer == 'left'): # Mouse left
-								moveVals[0] -= serMouseDist
-							elif (serBuffer == 'right'):	# Mouse right
-								moveVals[0] += serMouseDist
-							elif (serBuffer == 'up'):	# Mouse up
-								moveVals[1] += serMouseDist
-							elif (serBuffer == 'down'):	# Mouse down
-								moveVals[1] -= serMouseDist
-							elif (serBuffer.startswith('volts')):	# Battery Voltage
-								pageEvents.append(serBuffer)
-							elif (serBuffer.startswith('temp')):	# Temperature
-								pageEvents.append(serBuffer)
-							
-							# Clear serial buffer:
-							self.serBuffer = ""
-				except:
-					print ("Serial-port failure!")
-					config.USE_SERIAL = False
-			
 			if (config.USE_GPIO):
 				# page mode
 				rotary_1_input = self.gpioInput.rotary1.get_input()
@@ -542,9 +474,6 @@ class Engine:
 			self.drawAll()
 
 			self.clock.tick(config.FPS)
-		
-		if(config.USE_SERIAL):
-			self.ser.close()
 		
 		pygame.quit()
 		
